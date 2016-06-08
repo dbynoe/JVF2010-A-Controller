@@ -10,7 +10,7 @@
 #define CLK 12 //RIBBON 23 - Timer OC1B
 #define DRQ1 26 //ribbon 21
 
-#define data0 42 //RIBBON 16 THIS IS BACKWARDS
+#define data0 42 //RIBBON 16 THIS IS WIRED BACKWARDS
 #define data1 43 //RIBBON 14
 #define data2 44
 #define data3 45
@@ -77,60 +77,42 @@ void setup() {
   digitalWriteFast(DACK1, HIGH);
   digitalWriteFast(AEN,  LOW);
 
-  //TCCR1B  = (TCCR1B  & 0xF8) | 0X01 ; //SET PRESCALER TO 1 - 62.5035 KHZ
-  //TCCR1A = 0x23;
-  // TCCR1B = 0X09;
-  // OCR1A = 3;
-  // OCR1B = 1;
-
 }
 
 void loop() {
+  clock1();    
+  PORTL = B10100000; //5  
   clock1();
-      PORTL = B10100000; //5
-      clock1();
-      PORTL = B11100000; //7
-      clock1();
-digitalWriteFast(AEN, HIGH);
+  PORTL = B11100000; //7 - the 5,7 resets the sign to the first line
+  clock1();
+  digitalWriteFast(AEN, HIGH); //cycles the AEN line not sure why
   delayMicroseconds(1);
- 
- digitalWriteFast(AEN, LOW);
+
+  digitalWriteFast(AEN, LOW);
 
 
 
-  for (int y = 0; y < 48; y++) {
-
-
+  for (int y = 0; y < 48; y++) { //counter for each row of the sign 128x48
     setAddress();
-
-    PORTL = B11110001;
+    PORTL = B11110001; //8f
     clock1();
-    PORTL = B11110000;
+    PORTL = B11110000; //0f
     clock1();
-    PORTL = B11100000;
-    clock1();
-    digitalWriteFast(AEN, HIGH);
-  delayMicroseconds(1);
-
- digitalWriteFast(AEN, LOW);
-   
-      clearAddress();
-
-
-
-
-    clock2();
-
-
+    PORTL = B11100000; //7
+    clock1();  //initiates transfer 
+    digitalWriteFast(AEN, HIGH); //strobe the AEN line seems to be important
+    delayMicroseconds(1);
+    digitalWriteFast(AEN, LOW);
+    clearAddress(); //clear the address after sending the initial setup 
+    sendRow(); //start the loop 
     setAddress();
     PORTL = B10100000; //6
     clock1();
-    PORTL = B11100000; //7
+    PORTL = B11100000; //7 - increment to the next line
     clock1();
- digitalWriteFast(AEN, HIGH);
-   delayMicroseconds(1);
-  
- digitalWriteFast(AEN, LOW);
+    digitalWriteFast(AEN, HIGH);
+    delayMicroseconds(1);
+    digitalWriteFast(AEN, LOW);
     clearAddress();
     //clock1();
   }
@@ -145,7 +127,7 @@ digitalWriteFast(AEN, HIGH);
 }
 void clock1()
 {
-
+//I thought clock would need a bunch of thigns changing, but IOW seems to be all thats needed. 
   digitalWriteFast(IOW,  LOW);
   //digitalWriteFast(CLK,  !digitalReadFast(CLK));
   // digitalWriteFast(DACK1, !digitalReadFast(DACK1));
@@ -161,57 +143,46 @@ void clock1()
 
 }
 
-void clock2()
+void sendRow()
 {
-//setAddress();
-  for (int x = 0; x < 32; x++) {
+
+  for (int x = 0; x < 32; x++) { //32 bytes per row 2 bits per pixel. 
     digitalWriteFast(CLK, LOW);
-
     digitalWriteFast(CLK, HIGH);
-
     digitalWriteFast(AEN, LOW);
     delayMicroseconds(1);
-        clearAddress();
-            while (digitalRead (DRQ1) == LOW) {}
-    digitalWriteFast(AEN, HIGH);
+    clearAddress();
+    while (digitalRead (DRQ1) == LOW) {} //wait for the DRQ request line to go high
+    digitalWriteFast(AEN, HIGH); //take control of the bus 
+    digitalWriteFast(CLK, LOW);
+    digitalWriteFast(CLK, HIGH);
+    digitalWriteFast(CLK, LOW);
+    digitalWriteFast(DACK1, LOW); //set DACK1 LOW to acknowledge the drq line 
+    digitalWriteFast(CLK, HIGH);
     digitalWriteFast(CLK, LOW);
 
-   
+   PORTL = B11110000; //test pattern, two pixels on two pixels off
+    //PORTL = B11111111;
     digitalWriteFast(CLK, HIGH);
-
-     digitalWriteFast(CLK, LOW);
-      
-    digitalWriteFast(DACK1, LOW);
-    digitalWriteFast(CLK, HIGH);
-
-    digitalWriteFast(CLK, LOW);
-
-
-
-    PORTL = B11110000;
-//PORTL = B11111111;
-        digitalWriteFast(CLK, HIGH);
-      
     digitalWriteFast(IOW, LOW);
- 
+
     if (x == 31) {
-      digitalWriteFast(TC, HIGH);
+      digitalWriteFast(TC, HIGH); //after sending 32 bytes set the TC line high, not sure if needed. 
     }
 
     digitalWriteFast(CLK, LOW);
     digitalWriteFast(CLK, HIGH);
     digitalWriteFast(IOW, HIGH);
     digitalWriteFast(TC, LOW);
-    digitalWriteFast(DACK1, HIGH);
-   
-        digitalWriteFast(AEN, LOW);
-                 PORTL = B11111000;
-   //clearAddress();
+    digitalWriteFast(DACK1, HIGH); //release the bus 
+    digitalWriteFast(AEN, LOW);
+    PORTL = B11111000; //not sure if needed, makes telling the bytes apart easier the 386 does something like this. 
+    //clearAddress();
   }
 }
 
 void setAddress() {
-  digitalWriteFast(address9, HIGH);
+  digitalWriteFast(address9, HIGH);  //address is 0x02f0 or B1011110000
   digitalWriteFast(address8, LOW);
   digitalWriteFast(address7, HIGH);
   digitalWriteFast(address6, HIGH);
