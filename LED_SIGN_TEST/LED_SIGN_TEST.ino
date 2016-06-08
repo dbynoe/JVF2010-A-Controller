@@ -1,3 +1,5 @@
+//setup for a mega 2560
+
 #include <digitalWriteFast.h>
 #define RESET 22 //RIBBON 3  
 #define AEN 2 //RIBBON 9
@@ -10,22 +12,22 @@
 #define CLK 12 //RIBBON 23 - Timer OC1B
 #define DRQ1 26 //ribbon 21
 
-#define data0 42 //RIBBON 16 THIS IS WIRED BACKWARDS
-#define data1 43 //RIBBON 14
-#define data2 44
-#define data3 45
-#define data4 46
-#define data5 47
-#define data6 48
-#define data7 49 //RIBBON 2
+#define data0 42 //RIBBON 2  these lines are on PORTL on a MEGA 2560
+#define data1 43 //RIBBON 4
+#define data2 44 //RIBBON 6
+#define data3 45 //RIBBON 8
+#define data4 46//RIBBON 10
+#define data5 47//RIBBON 12
+#define data6 48//RIBBON 14
+#define data7 49 //RIBBON 16
 
 
-#define address2 37  //RIBBON 30
-#define address3 36
-#define address4 35
-#define address5 34
-#define address6 33
-#define address7 32
+#define address2 37 //RIBBON 30 // not sure which port these are on, should probally move them to one so its faster. 
+#define address3 36 //RIBBON 28
+#define address4 35 //RIBBON 26
+#define address5 34 //RIBBON 24
+#define address6 33 //RIBBON 22
+#define address7 32 //RIBBON 20
 #define address8 31 //RIBBON 18
 #define address9 30 //RIBBON 27
 
@@ -81,9 +83,9 @@ void setup() {
 
 void loop() {
   clock1();    
-  PORTL = B10100000; //5  
+  PORTL = 0x05;
   clock1();
-  PORTL = B11100000; //7 - the 5,7 resets the sign to the first line
+  PORTL = 0x07; //- the 5,7 resets the sign to the first line
   clock1();
   digitalWriteFast(AEN, HIGH); //cycles the AEN line not sure why
   delayMicroseconds(1);
@@ -94,21 +96,21 @@ void loop() {
 
   for (int y = 0; y < 48; y++) { //counter for each row of the sign 128x48
     setAddress();
-    PORTL = B11110001; //8f
+    PORTL = 0x8F; 
     clock1();
-    PORTL = B11110000; //0f
+    PORTL = 0x0F; 
     clock1();
-    PORTL = B11100000; //7
-    clock1();  //initiates transfer 
+    PORTL = 0x07; //8F 0F 7 initiates transfer 
+    clock1();  
     digitalWriteFast(AEN, HIGH); //strobe the AEN line seems to be important
     delayMicroseconds(1);
     digitalWriteFast(AEN, LOW);
     clearAddress(); //clear the address after sending the initial setup 
     sendRow(); //start the loop 
     setAddress();
-    PORTL = B10100000; //6
+    PORTL = 0x06; 
     clock1();
-    PORTL = B11100000; //7 - increment to the next line
+    PORTL = 0x07; // 6 7 - increment to the next line
     clock1();
     digitalWriteFast(AEN, HIGH);
     delayMicroseconds(1);
@@ -117,12 +119,6 @@ void loop() {
     //clock1();
   }
 
-  //digitalWrite(address2, HIGH);
-  //   PORTL = 0X05;
-  //      clock1();
-  //  PORTL = 0X07;
-  //   clock1();
-  // digitalWrite(address2, LOW);
 
 }
 void clock1()
