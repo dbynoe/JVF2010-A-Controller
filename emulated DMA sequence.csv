@@ -1,0 +1,66 @@
+Instruction,,STATE,Clock cycles,CLK state
+"Set CLK low, sample the DRQn line. (At this time, normally the DMA would deassert HLD.)",,i,0.5,L
+"Set CLK high. Set AEN low to release control of the bus. (At this time, the DMA would no longer be outputting the address onto ADDR.)",,i,0.5,H
+"If DRQn was high, change to state 0.",,i,,H
+,,,,
+Emulate the delay that would normally occur whilst waiting for the CPU to release the bus (HRQ and HLDA; HRQ would have been set upon sampling DRQn high earlier).,,0,1,"L, H"
+Change to state 1.,,,,H
+,,,,
+Emulate setting up the address bus - only signals actually used are emulated.,,1,,H
+Set AEN high to take control of the bus. Set CLK low.,,1,0.5,L
+"Set CLK high. (At this time, address upper and lower would be placed on the ADDR and DATA busses. ADR STB would be set high.) Change to state 2.",,1,0.5,H
+,,,,
+Set CLK low. Acknowledge the DREQn bt setting DACKn low.,,2,0.5,L
+"(At this time, ADR STB would be deasserted and the upper portion of the address removed from DATA.)",,2,,L
+Set CLK high.,,2,0.5,H
+,,,,
+Set CLK low.,,3,0.5,L
+"(At this time, the DMA would signal the memory to place its data onto DATA using MEM RD.)",,3,,L
+Place the data byte to be transferred onto DATA.,,3,,L
+Set CLK high. Signal the IO device to read the DATA by setting IO WR low.,,3,0.5,H
+"If this is the last byte to be transferred, set TC high.",,3,,H
+,,,,
+,,,,
+"The IO Device isn't using the IO CH READY or NOWS signals, but we should implement a minimum number of ""wait states"" to ensure that the device has time tocorrectly latch in the data. We may be able to tell from the Logic Analyser how many bus cycles this takes. One reference sates that wait states are added in pairs of bus cycles.",,,,
+,,,,
+,,,,
+Change to state 4.,,3,,H
+,,,,
+,,,,
+Set CLK low. Sample the DRQn line.,,4,0.5,L
+"Set CLK high, set IO WR high, set TC low.",,4,0.5,H
+"(At this time, the DMA would normally signal the memory to stop outputing the data by taking MEM RD high.)",,4,,H
+Signal the IO Device that the DMA cycle is over by setting DACKn high.,,4,,H
+,,,,
+"If DRQn was sampled high, change to state 1.",,4,,H
+,,,,
+"If DRQn was sampled low, change to state i.",,4,,H
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,
+,,,,

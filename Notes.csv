@@ -1,0 +1,44 @@
+Ribbon,Circuit Board,Circuit Board notes,Connect to ,ISA,ISA Purpose,Notes,First LA image line,Second A image line
+1,ground,,,B1,ground,x,,
+3,"u1 - 74sl00n,4,5 pins ",and into socket - connected to system reset,?,B2,reset drv,"Normaly low, pulses high breifly during data transfer, stops when data transfer stops",0,
+5,direct to socket,,,B6,drq2,50 khz pulse on startup - nothing on data,,
+7,ground,,,B1 B3 B10 B31,Power/ground,,,
+9,u51 - 74ls688n pin 1 u61 - 74ls688n pin 1,,LOW,A11,AEN,"Pulses during data transfer, two short highs, long lows, then 33 pulses as transfer goes",1,
+11,"u57 - 74ls32n pin 2
+u2 - 74ls04n pin 13",,,B13,IOW,"No idea what this is for, doesn't seem connected on the PC side",,
+13,"u52 - 74ls541n, 1",and into socket,LOW,B14,IOR,"32 pulses during data transfer, clock signal? - same as ribbon 19",2,
+15,no connection,,,b15,DACK 3,high,,
+17,no connection,,,b16,DRQ 3,Random short pulses,,
+19,"u3 74ls10n pin 5
+u2 - 74ls04n pin 1","CHECK WHATS ON  U3, PIN 3 AND 6",,b17,dack 1,"32 pulses during data transfer, clock signal? - same as ribbon 13 ",3,
+21,no connection,,,b18,DRQ 1,Random short pulses,,
+23,u3 - 74ls10n pin 4 u55 - 74ls164n pin 8,"clock 
+check u55",,b20,CLK,2.5mhz clock - actual transfer is a divide of this,4,
+25,heads towards socket,,,b22,IRQ 6,?,,
+27,u51 - 74ls688n pin 5 u61 pin 15,,HIGH,a22,Address 9,"Highest address bit, goes 1 when transfer starts",5,7
+29,heads towards socket,,,b26,dack 2,high,,
+31,heads towards socket,,,b27,T/C,Random short pulses,,
+33,ground,,,b31,ground,x,,
+2,u52 - 74ls541n pin 11,and onto socket,data 7,A2,data 7,"Data lines - shifts byte in parallel transfer is on rising edge - little endian, a bunch of garbage before the transfer I cant figure out, doesn’t seem to align to a clock pulse",,15
+4,u52 pin 12,,data 6,A3,data 6,,,14
+6,u52 pin 13,,data 5,A4,data 5,,,13
+8,u52 pin 14,,data 4,A5,data 4,,,12
+10,u52 pin 15,,data 3,A6,data 3,,,11
+12,u52 pin 16,,data 2,A7,data 2,,,10
+14,u52 pin 17,,data 1,A8,data 1,,,9
+16,u52 pin 18,,data 0,A9,data 0,,,8
+18,"u51 pin 3
+u61 pin 13 ",,LOW,a23,address 8,Goes low when transfer starts then cycles through memory addresses as it pulls stuff out of DMA,6,6
+20,"u51 pin 18
+u61 pin 11",,HIGH,a24,address 7 ,goes high when transfer starts,7,5
+22,"u51 pin 16
+u61 pin 8",,HIGH,a25,address 6,goes high when transfer starts,8,4
+24,"u51 pin 14
+u61 pin 6",,HIGH,a26,address 5,goes high when transfer starts,9,3
+26,"u51 pin 12
+u61 pin 4",,HIGH,a27,address 4,goes high when transfer starts,10,2
+28,"u51 pin 9
+u61 pin 2",,LOW,a28,address 3,Goes low when transfer starts,11,1
+30,u51 pin 7 ,also goes to socket,LOW,a29,address 2 ,Goes low when transfer starts,12,0
+32,,direct to socket,,a30,address 1 ,"ISA address line, not connected to logic board",,
+34,,direct to socket,,a31,address 0,"ISA address line, not connected to logic board",,
